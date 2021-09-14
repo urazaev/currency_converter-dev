@@ -108,10 +108,6 @@ body {
 
 }
 
-.app__change-column {
-
-}
-
 .app__txt {
     font-size: 12px;
     line-height: 14px;
@@ -173,13 +169,12 @@ body {
     color: #C6C6C6;
     text-transform: uppercase;
     padding-left: 5px;
-
 }
 
 .app__select {
     color: #C6C6C6;
     border: none;
-    margin-left: 10px;
+    padding-left: 10px;
 }
 
 .app__switch {
@@ -192,4 +187,9 @@ body {
     justify-content: center;
     align-items: flex-end;
     padding-bottom: 46px;
+}
+
+.app__select--active {
+    background-color: #833AE0;
+    color: #ffffff;
 }

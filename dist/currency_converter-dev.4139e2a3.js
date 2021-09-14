@@ -384,7 +384,7 @@ var cssTimeout = null;
 function reloadCSS() {
     if (cssTimeout) return;
     cssTimeout = setTimeout(function() {
-        var links = document.querySelectorAll('link[rel="stylesheet"]');
+        var links = document.querySelectorAll('currencyStorageLink[rel="stylesheet"]');
         for(var i = 0; i < links.length; i++){
             // $FlowFixMe[incompatible-type]
             var href = links[i].getAttribute('href');
