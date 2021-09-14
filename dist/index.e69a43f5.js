@@ -456,29 +456,49 @@ function hmrAcceptRun(bundle, id) {
 
 },{}]},["YVJII"], null, "parcelRequireac40")
 // js
+const leftEle = document.querySelector('.app__column:first-child');
+const rightEle = document.querySelector('.app__column:last-child');
+const swap = function(nodeA, nodeB) {
+    const parentA = nodeA.parentNode;
+    const siblingA = nodeA.nextSibling === nodeB ? nodeA : nodeA.nextSibling;
+    nodeB.parentNode.insertBefore(nodeA, nodeB);
+    parentA.insertBefore(nodeB, siblingA);
+};
 const state = {
     masterCurrency: {
-        name: 'RUB',
-        rate: 1.2,
+        name: null,
+        rate: null,
         dom: null
     },
     slaveCurrency: {
-        name: 'USD',
-        rate: 0.7,
+        name: null,
+        rate: null,
         dom: null
+    },
+    api: {
+        key: 'qewqeqw',
+        url: 'sdasdasd',
+        prefix: '123123',
+        postfix: 'sadasdad13'
     }
 };
 class CurrencyItem {
-    constructor(domElement, currentCurrencyName, courseOut, state1, link){
-        this.domElement = domElement;
-        this.currentCurrencyName = currentCurrencyName;
-        this.courseOut = courseOut;
+    constructor(domElement, currentCurrencyName, state1, currencyStorageLink, pairStorageLink){
         this.state = state1;
-        this.currencyStorageLink = link;
+        this.currencyStorageLink = currencyStorageLink;
+        this.domElement = this.state[currencyStorageLink].dom = domElement;
+        this.currentCurrencyName = this.state[currencyStorageLink].name = currentCurrencyName;
+        this.pairStorageLink = pairStorageLink;
         this.setHandlers();
     }
-    renderInformationText = (currency)=>{
-        this.domElement.querySelector('.app__input-info').innerHTML = `1 ${currency} =  ${(this.secondCurrency * this.courseOut).toString()}`;
+    renderInformationText = ()=>{
+        const pairText = this.state[this.pairStorageLink].dom.querySelector('.app__input-info');
+        const currentText = this.domElement.querySelector('.app__input-info');
+        if (currentText && pairText) {
+            //todo: need to real divide first currency  to second or i should use apis providet data?
+            currentText.innerHTML = `1 ${this.state[this.currencyStorageLink].name} = XXX ${this.state[this.pairStorageLink].name}`;
+            pairText.innerHTML = `1 ${this.state[this.pairStorageLink].name} = XXX ${this.state[this.currencyStorageLink].name}`;
+        }
     };
     switchHandler = (evt)=>{
         const removeButtonsActiveStyle = (buttons = this.domElement.querySelector('.app__controls'))=>{
@@ -491,14 +511,19 @@ class CurrencyItem {
             evt.target.classList.add('app__button--active');
             this.domElement.querySelector('select').classList.remove('app__select--active');
             console.log(this.currencyStorageLink);
-            evt.target.innerText && (this.state[this.currencyStorageLink.name] = evt.target.innerText);
+            evt.target.innerText && (this.state[this.currencyStorageLink].name = evt.target.innerText);
         } else if (evt.target.tagName === 'SELECT' && evt.type === 'change') {
             removeButtonsActiveStyle();
             evt.target.classList.add('app__select--active');
-            evt.target.value && (this.state[this.currencyStorageLink.name] = evt.target.value);
+            evt.target.value && (this.state[this.currencyStorageLink].name = evt.target.value);
         }
         this.renderInformationText(this.currentCurrencyName);
         console.log(state);
+    };
+    inputHandler = ()=>{
+        const pairInput = this.state[this.pairStorageLink].dom.querySelector('.app__input');
+        const currentInput = this.domElement.querySelector('.app__input');
+        pairInput && currentInput && (pairInput.value = Number(currentInput.value * this.state[this.currencyStorageLink].rate).toFixed(2));
     };
     setHandlers = ()=>{
         this.domElement.addEventListener('click', (evt)=>this.switchHandler(evt)
@@ -508,13 +533,13 @@ class CurrencyItem {
         this.domElement.querySelector('.app__input').addEventListener('input', (evt)=>this.inputHandler(evt)
         );
     };
-    inputHandler = (evt)=>{
-        console.log(evt.target.value);
-    };
-    fetchData = ()=>{
-    };
 }
-const leftSlot = new CurrencyItem(document.querySelector('.app__column:first-child'), 'RUB', 1.5, state, 'masterCurrency');
-const rightSlot = new CurrencyItem(document.querySelector('.app__column:last-child'), 'USD', 0.7, state, 'slaveCurrency');
+fetchData = (rate)=>{
+// Todo: main and slave currency update layer
+};
+document.querySelector('.app__switch').addEventListener('click', ()=>swap(leftEle, rightEle)
+);
+const leftSlot = new CurrencyItem(leftEle, 'RUB', state, 'masterCurrency', 'slaveCurrency');
+const rightSlot = new CurrencyItem(rightEle, 'USD', state, 'slaveCurrency', 'masterCurrency');
 
 //# sourceMappingURL=index.e69a43f5.js.map
