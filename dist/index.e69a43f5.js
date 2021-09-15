@@ -491,30 +491,25 @@ class CurrencyItem {
     constructor(state1, currencyStorageLink, pairStorageLink){
         this.state = state1;
         this.currencyStorageLink = currencyStorageLink;
-        this.currentCurrencyName = this.state[currencyStorageLink].name;
-        this.currentCurrencyRate = this.state[currencyStorageLink].rate;
-        this.currentDomElement = this.state[currencyStorageLink].dom;
         this.pairStorageLink = pairStorageLink;
-        this.pairCurrencyName = this.state[pairStorageLink].name;
-        this.pairCurrencyRate = this.state[pairStorageLink].rate;
-        this.pairDomElement = this.state[pairStorageLink].dom;
         this.fetchData();
         this.setHandlers();
+        this.renderInformationText();
+        this.updateInputs();
     }
     renderInformationText = ()=>{
-        const pairText = this.pairDomElement.querySelector('.app__input-info');
-        const currentText = this.currentDomElement.querySelector('.app__input-info');
+        const pairText = this.state[this.pairStorageLink].dom.querySelector('.app__input-info');
+        const currentText = this.state[this.currencyStorageLink].dom.querySelector('.app__input-info');
         if (currentText && pairText) {
-            if (this.currentCurrencyName === this.pairCurrencyName) {
-                currentText.innerHTML = `1 ${this.currentCurrencyName} = 1 ${this.pairCurrencyName}`;
-                pairText.innerHTML = `1 ${this.pairCurrencyName} = 1 ${this.pairCurrencyName}`;
+            if (this.state[this.currencyStorageLink].name === this.state[this.pairStorageLink].name) currentText.innerHTML = pairText.innerHTML = `1 ${this.state[this.currencyStorageLink].name} = 1 ${this.state[this.currencyStorageLink].name}`;
+            else {
+                currentText.innerHTML = `1 ${this.state[this.currencyStorageLink].name} = ${this.state[this.currencyStorageLink].rate} ${this.state[this.pairStorageLink].name}`;
+                pairText.innerHTML = `1 ${this.state[this.pairStorageLink].name} = ${this.state[this.pairStorageLink].rate} ${this.state[this.currencyStorageLink].name}`;
             }
-            currentText.innerHTML = `1 ${this.currentCurrencyName} = ${this.currentCurrencyRate} ${this.pairCurrencyName}`;
-            pairText.innerHTML = `1 ${this.pairCurrencyName} = ${this.pairCurrencyRate} ${this.pairCurrencyName}`;
         }
     };
     switchHandler = (evt)=>{
-        const removeButtonsActiveStyle = (buttons = this.currentDomElement.querySelector('.app__controls'))=>{
+        const removeButtonsActiveStyle = (buttons = this.state[this.currencyStorageLink].dom.querySelector('.app__controls'))=>{
             buttons.querySelectorAll('button').forEach((el)=>{
                 el.classList.remove('app__button--active');
             });
@@ -522,8 +517,7 @@ class CurrencyItem {
         if (evt.target.tagName === 'BUTTON' && evt.target.classList.contains('app__button') && evt.type === 'click') {
             removeButtonsActiveStyle();
             evt.target.classList.add('app__button--active');
-            this.currentDomElement.querySelector('select').classList.remove('app__select--active');
-            console.log(this.currencyStorageLink);
+            this.state[this.currencyStorageLink].dom.querySelector('select').classList.remove('app__select--active');
             evt.target.innerText && (this.state[this.currencyStorageLink].name = evt.target.innerText);
         } else if (evt.target.tagName === 'SELECT' && evt.type === 'change') {
             removeButtonsActiveStyle();
@@ -531,31 +525,31 @@ class CurrencyItem {
             evt.target.value && (this.state[this.currencyStorageLink].name = evt.target.value);
         }
         this.renderInformationText();
-        this.fetchData();
-        console.log(state);
+        if (this.state[this.currencyStorageLink].name === this.state[this.pairStorageLink].name) this.state[this.currencyStorageLink].rate = this.state[this.pairStorageLink].rate = 1;
+        else this.fetchData();
+        this.updateInputs();
     };
-    inputHandler = ()=>{
+    updateInputs = ()=>{
         const pairInput = this.state[this.pairStorageLink].dom.querySelector('.app__input');
-        const currentInput = this.currentDomElement.querySelector('.app__input');
+        const currentInput = this.state[this.currencyStorageLink].dom.querySelector('.app__input');
         pairInput && currentInput && (pairInput.value = Number(currentInput.value * this.state[this.currencyStorageLink].rate).toFixed(2));
     };
     setHandlers = ()=>{
-        this.currentDomElement.querySelectorAll('button').forEach((el)=>{
+        this.state[this.currencyStorageLink].dom.querySelectorAll('button').forEach((el)=>{
             el.addEventListener('click', (evt)=>this.switchHandler(evt)
             );
         });
-        this.currentDomElement.querySelector('select').addEventListener('change', (evt)=>this.switchHandler(evt)
+        this.state[this.currencyStorageLink].dom.querySelector('select').addEventListener('change', (evt)=>this.switchHandler(evt)
         );
-        this.currentDomElement.querySelector('.app__input').addEventListener('input', (evt)=>this.inputHandler(evt)
+        this.state[this.currencyStorageLink].dom.querySelector('.app__input').addEventListener('input', (evt)=>this.updateInputs(evt)
         );
     };
-    fetchData = async (rate)=>{
+    fetchData = ()=>{
         fetch(`${APP_SETTINGS.api.prefix}${APP_SETTINGS.api.url}?api_key=${APP_SETTINGS.api.key}&base=${this.state[this.currencyStorageLink].name}&quote=${this.state[this.pairStorageLink].name}`).then((response)=>response.json()
         ).then((data)=>{
             this.state[this.currencyStorageLink].rate = data.quotes[0].midpoint;
-            console.log(data.quotes[0].midpoint);
             this.renderInformationText();
-        // this.inputHandler()
+            this.updateInputs();
         });
     };
 }
